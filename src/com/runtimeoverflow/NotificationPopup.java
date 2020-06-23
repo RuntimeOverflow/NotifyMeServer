@@ -131,7 +131,7 @@ public class NotificationPopup extends JFrame {
 		
 		//Content view
 		JPanel content = new JPanel();
-		content.setBounds(Properties.multiplier * 0, Properties.multiplier * 30, Properties.multiplier * 359, Properties.multiplier * 34);
+		content.setBounds(Properties.multiplier * 0, Properties.multiplier * 30, Properties.multiplier * 359, 0);
 		content.setLayout(null);
 		content.setOpaque(false);
 		content.setBackground(new Color(0, 0, 0, 0));
@@ -183,15 +183,17 @@ public class NotificationPopup extends JFrame {
 		icon.setBounds(Properties.multiplier * 10, Properties.multiplier * 10, Properties.multiplier * 20, Properties.multiplier * 20);
 		app.setBounds(Properties.multiplier * 35, Properties.multiplier * 8, Properties.multiplier * 174, Properties.multiplier * 24);
 		date.setBounds(Properties.multiplier * 209, Properties.multiplier * 8, Properties.multiplier * 135, Properties.multiplier * 24);
-		title.setBounds(Properties.multiplier * 12, Properties.multiplier * 6, (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), Properties.multiplier * 16);
-		subtitle.setBounds(Properties.multiplier * 12, Properties.multiplier * 6 + (!notification.title.isEmpty() ? Properties.multiplier * 18 : Properties.multiplier * 0), (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), Properties.multiplier * 16);
-		body.setBounds(Properties.multiplier * 12, Properties.multiplier * 6 + (!notification.title.isEmpty() ? Properties.multiplier * 18 : Properties.multiplier * 0) + (!notification.subtitle.isEmpty() ? Properties.multiplier * 18 : Properties.multiplier * 0), (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), Properties.multiplier * 14);
+		
+		title.setBounds(Properties.multiplier * 12, Properties.multiplier * 6, (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), (!notification.title.isEmpty() ? Properties.multiplier * 16 : Properties.multiplier * 0));
+		subtitle.setBounds(Properties.multiplier * 12, title.getY() + title.getHeight() + (!notification.title.isEmpty() ? Properties.multiplier * 2 : Properties.multiplier * 0), (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), (!notification.subtitle.isEmpty() ? Properties.multiplier * 16 : Properties.multiplier * 0));
+		body.setBounds(Properties.multiplier * 12, subtitle.getY() + subtitle.getHeight() + (!notification.subtitle.isEmpty() ? Properties.multiplier * 2 : Properties.multiplier * 0), (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), Properties.multiplier * 0);
 		attachment.setBounds(Properties.multiplier * 309, Properties.multiplier * 6, Properties.multiplier * 35, Properties.multiplier * 35);
 		
-		int bodyHeight = Math.min(countLines(body), 4) * body.getFontMetrics(body.getFont()).getHeight();
+		body.setSize(body.getWidth(), Properties.multiplier * body.getFontMetrics(body.getFont()).getHeight() * countLines(body));
 		
-		content.setSize(content.getWidth(), content.getHeight() + bodyHeight + (!notification.subtitle.isEmpty() ? Properties.multiplier * 18 : Properties.multiplier * 0));
-		body.setSize(body.getWidth(), bodyHeight);
+		//int bodyHeight = countLines(body) * body.getFontMetrics(body.getFont()).getHeight();
+		
+		content.setSize(content.getWidth(), Properties.multiplier * 10 + Math.max(body.getY() + body.getHeight(), attachment.getY() + attachment.getHeight()));
 		
 		//Creating the panel
 		JPanel panel = new JPanel() {
@@ -204,9 +206,8 @@ public class NotificationPopup extends JFrame {
 				//Enabling anti aliasing
 				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
-				Area a = new Area();
-				
 				//Creating the rounded rectangle with rectangles and circles
+				Area a = new Area();
 				a.add(new Area(new Rectangle2D.Double(cornerRadius, 0, getWidth() - 2 * cornerRadius, getHeight())));
 				a.add(new Area(new Rectangle2D.Double(0, cornerRadius, getWidth(), getHeight() - 2 * cornerRadius)));
 				
@@ -221,7 +222,8 @@ public class NotificationPopup extends JFrame {
 			}
 		};
 		
-		panel.setSize(Properties.multiplier * 359, Properties.multiplier * 64 + bodyHeight + (!notification.subtitle.isEmpty() ? Properties.multiplier * 18 : Properties.multiplier * 0));
+		//Setting window properties
+		panel.setSize(Properties.multiplier * 359, header.getHeight() + content.getHeight());
 		panel.setLayout(null);
 		panel.setBackground(new Color(0, 0, 0, 0));
 		panel.setOpaque(false);
