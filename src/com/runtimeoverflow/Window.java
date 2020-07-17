@@ -43,7 +43,6 @@ public class Window extends JFrame {
 	public void setScene(JPanel scene) {
 		if(scene.getName() != null && !scene.getName().isEmpty()) setTitle(scene.getName());
 		
-		//if(this.scene != null) remove(this.scene);
 		this.scene = scene;
 		
 		scene.setLayout(null);
@@ -73,6 +72,7 @@ public class Window extends JFrame {
 		scene.requestFocus();
 	}
 	
+	//Returns the currently active scene
 	public JPanel getScene() {
 		return scene;
 	}

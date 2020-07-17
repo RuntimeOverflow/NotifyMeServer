@@ -30,24 +30,39 @@ public class Properties {
 	//Other variables
 	public transient static Thread server = null;
 	public transient static Thread udpListener = null;
+	public transient static ArrayList<Device> discoveredDevices = new ArrayList<Device>();
 	public transient static ArrayList<NotificationPopup> popups = new ArrayList<NotificationPopup>();
-	public transient static ArrayList<InetAddress> broadcastAddresses = new ArrayList<InetAddress>();
 	public transient static Font font;
 	public transient static Font boldFont;
 	public transient static int multiplier = 1;
+	
+	//Images and icons
+	private transient static BufferedImage logo = null;
+	public transient static BufferedImage settingsIcon = null;
+	public transient static BufferedImage devicesIcon = null;
 	
 	public static void init() {
 		try {
 			//Loads the tweak logo
 			logo = ImageIO.read(Main.class.getResourceAsStream("/resources/Icon.png"));
+			settingsIcon = ImageIO.read(Main.class.getResourceAsStream("/resources/Settings.png"));
+			devicesIcon = ImageIO.read(Main.class.getResourceAsStream("/resources/Devices.png"));
 			
 			//Loads the San Francisco font (=iOS Font)
 			font = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/resources/SF-Pro-Text-Light.otf"));
 			boldFont = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/resources/SF-Pro-Text-Medium.otf"));
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(boldFont);
-			
-			//Calculates the broadcast address from each network interface (and filters invalid results)
+		} catch (IOException | FontFormatException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//Calculates the broadcast address from each network interface
+	public static ArrayList<InetAddress> calculateBroadcastAddress() {
+		ArrayList<InetAddress> broadcastAddresses = new ArrayList<InetAddress>();
+		
+		try {
 			Enumeration<NetworkInterface> list = NetworkInterface.getNetworkInterfaces();
 			while(list.hasMoreElements()) {
 				NetworkInterface iface = (NetworkInterface) list.nextElement();
@@ -66,13 +81,14 @@ public class Properties {
 					}
 				}
 			}
-		} catch (IOException | FontFormatException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return broadcastAddresses;
 	}
 	
 	//Getting the tweak logo in the passed color
-	private static BufferedImage logo = null;
 	public static BufferedImage getIconWithColor(Color color) {
 		int w = logo.getWidth();
 		int h = logo.getHeight();
@@ -90,13 +106,13 @@ public class Properties {
 	}
 	
 	//Calculates the font size in points for the specified pixel height
-	public static float getPointSizeForHeight(int pxSize) {
+	public static float getPointSizeForHeight(int pxSize, Font font) {
 		JLabel tester = new JLabel();
 		float pointSize = 0;
 		
 		for(float i = 1; i < 20; i++) {
-			if(tester.getFontMetrics(Properties.font.deriveFont(i)).getHeight() > pxSize) {
-				if(Math.abs(tester.getFontMetrics(Properties.font.deriveFont(pointSize)).getHeight() - pxSize) > tester.getFontMetrics(Properties.font.deriveFont(i)).getHeight() - pxSize) pointSize = i;
+			if(tester.getFontMetrics(font.deriveFont(i)).getHeight() > pxSize) {
+				if(Math.abs(tester.getFontMetrics(font.deriveFont(pointSize)).getHeight() - pxSize) > tester.getFontMetrics(font.deriveFont(i)).getHeight() - pxSize) pointSize = i;
 				break;
 			} else pointSize = i;
 		}

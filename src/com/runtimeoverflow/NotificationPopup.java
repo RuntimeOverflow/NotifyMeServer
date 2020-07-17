@@ -156,8 +156,8 @@ public class NotificationPopup extends JFrame {
 		body.setFocusable(false);
 		
 		//Calculation font sizes
-		float smallSize = Properties.getPointSizeForHeight(Properties.multiplier * 13);
-		float normalSize = Properties.getPointSizeForHeight(Properties.multiplier * 14);
+		float smallSize = Properties.getPointSizeForHeight(Properties.multiplier * 13, Properties.font);
+		float normalSize = Properties.getPointSizeForHeight(Properties.multiplier * 14, Properties.font);
 		
 		//Setting font
 		app.setFont(Properties.font.deriveFont(smallSize));
@@ -187,11 +187,9 @@ public class NotificationPopup extends JFrame {
 		title.setBounds(Properties.multiplier * 12, Properties.multiplier * 6, (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), (!notification.title.isEmpty() ? Properties.multiplier * 16 : Properties.multiplier * 0));
 		subtitle.setBounds(Properties.multiplier * 12, title.getY() + title.getHeight() + (!notification.title.isEmpty() ? Properties.multiplier * 2 : Properties.multiplier * 0), (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), (!notification.subtitle.isEmpty() ? Properties.multiplier * 16 : Properties.multiplier * 0));
 		body.setBounds(Properties.multiplier * 12, subtitle.getY() + subtitle.getHeight() + (!notification.subtitle.isEmpty() ? Properties.multiplier * 2 : Properties.multiplier * 0), (!notification.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), Properties.multiplier * 0);
-		attachment.setBounds(Properties.multiplier * 309, Properties.multiplier * 6, Properties.multiplier * 35, Properties.multiplier * 35);
+		attachment.setBounds(Properties.multiplier * 309, Properties.multiplier * 6, Properties.multiplier * 35, (!notification.attachment.isEmpty() ? Properties.multiplier * 35 : Properties.multiplier * 0));
 		
-		body.setSize(body.getWidth(), Properties.multiplier * body.getFontMetrics(body.getFont()).getHeight() * countLines(body));
-		
-		//int bodyHeight = countLines(body) * body.getFontMetrics(body.getFont()).getHeight();
+		body.setSize(body.getWidth(), body.getFontMetrics(body.getFont()).getHeight() * countLines(body));
 		
 		content.setSize(content.getWidth(), Properties.multiplier * 10 + Math.max(body.getY() + body.getHeight(), attachment.getY() + attachment.getHeight()));
 		

@@ -21,11 +21,12 @@ import com.runtimeoverflow.NotificationPopup;
 import com.runtimeoverflow.Utilities.Properties;
 
 public class Notification {
-	//Properties of a notification (This class is like a struct, but I dislike structs)
+	//Properties of a notification
 	public String title = "";
 	public String subtitle = "";
 	public String body = "";
 	public String bundleId = "";
+	public String threadId = "";
 	public String id = "";
 	public String category = "";
 	public String app = "";
@@ -58,6 +59,7 @@ public class Notification {
 	
 	//Creates the attachment image from the base64 encoded string (if there is one)
 	public Image getAttachment() {
+		//If there is no image, return a transparent one
 		if(attachment.isEmpty()) {
 			BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = img.createGraphics();
@@ -161,7 +163,6 @@ public class Notification {
 	//Function, which will create a popup for the passed notification and display it
 	public static void presentNotification(Notification notification) {
 		NotificationPopup popup = new NotificationPopup(notification);
-		
 		int height = popup.getHeight();
 		
 		//Making all popups go up
