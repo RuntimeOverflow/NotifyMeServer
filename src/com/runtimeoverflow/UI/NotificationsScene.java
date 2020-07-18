@@ -1,15 +1,10 @@
 package com.runtimeoverflow.UI;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.runtimeoverflow.NotificationPopup;
@@ -27,31 +22,7 @@ public class NotificationsScene extends JPanel {
 		setLayout(null);
 		setSize(Properties.multiplier * 359, Properties.multiplier * 78 * 6 + Properties.multiplier * 32);
 		
-		JPanel settingsButton = new JPanel() {
-			@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				
-				g.drawImage(Properties.settingsIcon, 0, 0, this.getWidth(), this.getHeight(), null);
-			}
-		};
-		
-		settingsButton.setLayout(null);
-		settingsButton.setOpaque(false);
-		
-		JPanel devicesButton = new JPanel() {
-			@Override
-			protected void paintComponent(Graphics g) {
-				super.paintComponent(g);
-				
-				g.drawImage(Properties.devicesIcon, 0, 0, this.getWidth(), this.getHeight(), null);
-			}
-		};
-		
-		devicesButton.setLayout(null);
-		devicesButton.setOpaque(false);
-		
-		bar = new MenuBar(settingsButton, devicesButton, "Notifications");
+		bar = new MenuBar(Properties.settingsIcon, Properties.devicesIcon, "Notifications");
 		bar.setBounds(0, 0, getWidth(), Properties.multiplier * 32);
 		bar.setBackground(Color.WHITE);
 		add(bar);
@@ -87,7 +58,12 @@ public class NotificationsScene extends JPanel {
 		int height = 0;
 		for(Device device : Properties.devices) {
 			for(ArrayList<Notification> group : device.groups) {
-				JPanel notificationPanel = NotificationPopup.createPanel(group.get(0));
+				Notification clone = group.get(0).copy();
+				if(group.size() > 1) {
+					clone.body += "\n\n" + Integer.toString(group.size() - 1) + " more notification" + (group.size() - 1 != 1 ? "s" : "");
+				}
+				
+				JPanel notificationPanel = NotificationPopup.createPanel(clone);
 				
 				if(groupCount > 0) height += Properties.multiplier * 10;
 				notificationPanel.setLocation(0, height);
@@ -95,6 +71,17 @@ public class NotificationsScene extends JPanel {
 				
 				groupCount++;
 				content.add(notificationPanel);
+				
+				/*if(group.size() > 1) {
+					float smallSize = Properties.getPointSizeForHeight(Properties.multiplier * 13, Properties.font);
+					
+					JLabel moreLabel = new JLabel(Integer.toString(group.size() - 1) + " more notification" + (group.size() - 1 != 1 ? "s" : ""));
+					moreLabel.setBounds(Properties.multiplier * 12, height + Properties.multiplier * 5, getWidth(), Properties.multiplier * 13);
+					moreLabel.setFont(Properties.font.deriveFont(smallSize));
+					content.add(moreLabel);
+					
+					height += Properties.multiplier * 18;
+				}*/
 				
 				count += group.size();
 			}

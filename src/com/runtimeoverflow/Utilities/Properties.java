@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -37,7 +38,7 @@ public class Properties {
 	public transient static int multiplier = 1;
 	
 	//Images and icons
-	private transient static BufferedImage logo = null;
+	public transient static BufferedImage logo = null;
 	public transient static BufferedImage settingsIcon = null;
 	public transient static BufferedImage devicesIcon = null;
 	
@@ -88,15 +89,15 @@ public class Properties {
 		return broadcastAddresses;
 	}
 	
-	//Getting the tweak logo in the passed color
-	public static BufferedImage getIconWithColor(Color color) {
-		int w = logo.getWidth();
-		int h = logo.getHeight();
+	//Changes an image to the specified color
+	public static BufferedImage getImageWithColor(Image img, Color color) {
+		int w = img.getWidth(null);
+		int h = img.getHeight(null);
 		
 		BufferedImage icon = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = icon.createGraphics();
 		
-		g.drawImage(logo, 0, 0, null);
+		g.drawImage(img, 0, 0, null);
 		g.setComposite(AlphaComposite.SrcAtop);
 		g.setColor(color);
 		g.fillRect(0,0,w,h);
@@ -118,5 +119,13 @@ public class Properties {
 		}
 		
 		return pointSize;
+	}
+	
+	public static String filterSpecialCharacters(String text, Font font) {
+		StringBuilder sb = new StringBuilder();
+		
+		for(char c : text.toCharArray()) if(font.canDisplay(c)) sb.append(c);
+		
+		return sb.toString();
 	}
 }

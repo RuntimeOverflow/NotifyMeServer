@@ -5,14 +5,20 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.font.FontRenderContext;
+import java.awt.font.LineBreakMeasurer;
+import java.awt.font.TextAttribute;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.text.AttributedCharacterIterator;
+import java.text.AttributedString;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -138,11 +144,11 @@ public class NotificationPopup extends JFrame {
 		
 		//UI elements
 		JLabel icon = new JLabel(new ImageIcon(notification.getIcon().getScaledInstance(Properties.multiplier * 20, Properties.multiplier * 20, Image.SCALE_SMOOTH)));
-		JLabel app = new JLabel(notification.app.toUpperCase());
+		JLabel app = new JLabel(Properties.filterSpecialCharacters(notification.app.toUpperCase(), Properties.font));
 		JLabel date = new JLabel(notification.stringFromDate(), SwingConstants.RIGHT);
-		JLabel title = new JLabel(notification.title);
-		JLabel subtitle = new JLabel(notification.subtitle);
-		JTextArea body = new JTextArea(notification.body);
+		JLabel title = new JLabel(Properties.filterSpecialCharacters(notification.title, Properties.font));
+		JLabel subtitle = new JLabel(Properties.filterSpecialCharacters(notification.subtitle, Properties.font));
+		JTextArea body = new JTextArea(Properties.filterSpecialCharacters(notification.body, Properties.font));
 		JLabel attachment = new JLabel(new ImageIcon(notification.getAttachment().getScaledInstance(Properties.multiplier * 35, Properties.multiplier * 35, Image.SCALE_SMOOTH)));
 		
 		//Setting properties of the body element
@@ -191,6 +197,8 @@ public class NotificationPopup extends JFrame {
 		
 		body.setSize(body.getWidth(), body.getFontMetrics(body.getFont()).getHeight() * countLines(body));
 		
+		System.out.println(countLines(body) + " <> " + countLines2(body));
+		
 		content.setSize(content.getWidth(), Properties.multiplier * 10 + Math.max(body.getY() + body.getHeight(), attachment.getY() + attachment.getHeight()));
 		
 		//Creating the panel
@@ -234,20 +242,41 @@ public class NotificationPopup extends JFrame {
 	
 	//Utility method for calculation the amount of rows for the body
 	private static int countLines(JTextArea textArea) {
-	    PlainDocument doc = (PlainDocument)textArea.getDocument();
-	    
-	    double count = 0;
-	    for (int i = 0; i < textArea.getLineCount(); i++) {
-	        try {
-	            int start = textArea.getLineStartOffset(i);
-	            int length = textArea.getLineEndOffset(i) - start;
-	            count += Math.ceil(textArea.getFontMetrics(textArea.getFont()).stringWidth(doc.getText(start, length)) / (double)textArea.getWidth());
-	        } catch (javax.swing.text.BadLocationException e) {
-	            e.printStackTrace();
-	        }
+		PlainDocument doc = (PlainDocument)textArea.getDocument();
+		
+		int count = 0;
+		for (int i = 0; i < textArea.getLineCount(); i++) {
+			try {
+				int start = textArea.getLineStartOffset(i);
+				int length = textArea.getLineEndOffset(i) - start;
+				
+				count += Math.max(1, Math.ceil(textArea.getFontMetrics(textArea.getFont()).stringWidth(doc.getText(start, length)) / (double)textArea.getWidth()));
+			} catch (javax.swing.text.BadLocationException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return count;
+	}
+	
+	private static int countLines2(JTextArea textArea) {
+	    AttributedString text = new AttributedString(textArea.getText());
+	    text.addAttribute(TextAttribute.FONT, textArea.getFont());
+	    FontRenderContext frc = textArea.getFontMetrics(textArea.getFont()).getFontRenderContext();
+	    AttributedCharacterIterator charIt = text.getIterator();
+	    LineBreakMeasurer lineMeasurer = new LineBreakMeasurer(charIt, frc);
+	    Insets textAreaInsets = textArea.getInsets();
+	    float formatWidth = textArea.getWidth() - textAreaInsets.left - textAreaInsets.right;
+	    lineMeasurer.setPosition(charIt.getBeginIndex());
+
+	    int noLines = 0;
+	    while (lineMeasurer.getPosition() < charIt.getEndIndex())
+	    {
+	        lineMeasurer.nextLayout(formatWidth);
+	        noLines++;
 	    }
-	    
-	    return (int)Math.floor(count);
+
+	    return noLines;
 	}
 	
 	//Simple override to adjust the targetY when changing the position

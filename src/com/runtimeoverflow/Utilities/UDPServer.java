@@ -61,6 +61,42 @@ public class UDPServer implements Runnable {
 						ms.send(dp);
 						ms.close();
 					}
+				} else if(msg.startsWith("[NotifyMe] FOUND")) {
+					String[] params = msg.substring("[NotifyMe] FOUND ".length()).split(" ");
+					
+					if(params.length >= 2) {
+						//Decodes the name and uuid of the device
+						String uuid = new String(Base64.getDecoder().decode(params[0]));
+						String name = new String(Base64.getDecoder().decode(params[1]));
+						
+						//Checks if the device is already known
+						boolean alreadyAdded = false;
+						Device device = null;
+						for(Device d : Properties.devices) {
+							if(d.uuid.equals(uuid)) {
+								alreadyAdded = true;
+								device = d;
+								break;
+							}
+						}
+						
+						if(!alreadyAdded) {
+							//If the device is not known, create it and add it to the list of devices
+							Properties.devices.add(new Device(uuid, name, packet.getAddress().getHostAddress()));
+							
+							//Request all notifications from the device
+							byte[] content = "[NotifyMe] RELOAD".getBytes();
+							DatagramPacket dp = new DatagramPacket(content, content.length, packet.getAddress(), Properties.port);
+							DatagramSocket ms = new DatagramSocket();
+							ms.setBroadcast(true);
+							ms.send(dp);
+							ms.close();
+						} else {
+							//If the device is already known, only update the information, which might have changed
+							device.ip = packet.getAddress().getHostAddress();
+							device.name = name;
+						}
+					}
 				}
 			}
 			ds.close();
@@ -71,6 +107,18 @@ public class UDPServer implements Runnable {
 	
 	//Search for devices by broadcasting a message using UDP
 	public static void searchDevice() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//Search devices
+				searchDevice(false);
+			}
+		});
+		t.start();
+	}
+	
+	//Search for devices by broadcasting a message using UDP (if the first attempt fails, it tries a second time)
+	private static void searchDevice(boolean secondAttempt) {
 		try {
 			byte[] content = "[NotifyMe] SEARCH DEVICE".getBytes();
 			
@@ -83,6 +131,9 @@ public class UDPServer implements Runnable {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			
+			//In case of a fail, retry a second time
+			if(!secondAttempt) searchDevice(true);
 		}
 	}
 }

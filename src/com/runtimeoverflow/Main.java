@@ -41,8 +41,8 @@ public class Main {
 				SystemTray sysTray = SystemTray.getSystemTray();
 				
 				//Create a system tray icon
-				int size = new TrayIcon(Properties.getIconWithColor(Color.WHITE)).getSize().width;
-				tray = new TrayIcon(Properties.getIconWithColor(Color.WHITE).getScaledInstance(size, size, Image.SCALE_SMOOTH), "NotifyMe");
+				int size = new TrayIcon(Properties.getImageWithColor(Properties.logo, Color.WHITE)).getSize().width;
+				tray = new TrayIcon(Properties.getImageWithColor(Properties.logo, Color.WHITE).getScaledInstance(size, size, Image.SCALE_AREA_AVERAGING), "NotifyMe");
 				tray.setImageAutoSize(true);
 				
 				//Adding a click listener to toggle the window visibility
@@ -76,7 +76,7 @@ public class Main {
 		}
 		
 		//Initializing the window
-		Window.get().setIconImages(Arrays.asList(new Image[] {Properties.getIconWithColor(Color.WHITE).getScaledInstance(128, 128, Image.SCALE_SMOOTH), Properties.getIconWithColor(Color.BLACK).getScaledInstance(16, 16, Image.SCALE_SMOOTH)}));
+		Window.get().setIconImages(Arrays.asList(new Image[] {Properties.getImageWithColor(Properties.logo, Color.WHITE).getScaledInstance(128, 128, Image.SCALE_AREA_AVERAGING), Properties.getImageWithColor(Properties.logo, Color.BLACK).getScaledInstance(16, 16, Image.SCALE_AREA_AVERAGING)}));
 		Window.get().setTitle("NotifyMe");
 		
 		NotificationsScene s = new NotificationsScene();

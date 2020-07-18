@@ -81,6 +81,25 @@ public class Notification {
 		return null;
 	}
 	
+	//Creates a duplicate of this notification, which can be modified later
+	public Notification copy() {
+		Notification n = new Notification();
+		
+		n.title = title;
+		n.subtitle = subtitle;
+		n.body = body;
+		n.bundleId = bundleId;
+		n.threadId = threadId;
+		n.id = id;
+		n.category = category;
+		n.app = app;
+		n.icon = icon;
+		n.attachment = attachment;
+		n.date = date;
+		
+		return n;
+	}
+	
 	//Creates a relative string from the date property
 	public String stringFromDate() {
 		Calendar now = Calendar.getInstance();
