@@ -45,7 +45,7 @@ public class Server implements Runnable {
 				} else {
 					//If the device is known, the computer will encrypt an example String and send it back to the device
 					BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-					bw.write("[NotifyMe] VERIFY " + Encryption.encrypt("Manufactured in Switzerland", device.key) + "\r");
+					bw.write("[NotifyMe] VERIFY " + Utilities.encrypt("Manufactured in Switzerland", device.key) + "\r");
 					bw.flush();
 					
 					//Timeout, if the the device is suddenly unavailable

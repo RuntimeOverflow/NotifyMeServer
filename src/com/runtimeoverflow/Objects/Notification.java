@@ -1,24 +1,29 @@
 package com.runtimeoverflow.Objects;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.RenderingHints;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
-import java.util.Locale;
 
 import javax.imageio.ImageIO;
-import javax.swing.Timer;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 
-import com.runtimeoverflow.NotificationPopup;
 import com.runtimeoverflow.Utilities.Properties;
+import com.runtimeoverflow.Utilities.Utilities;
 
 public class Notification {
 	//Properties of a notification
@@ -33,6 +38,9 @@ public class Notification {
 	public String icon = "";
 	public String attachment = "";
 	public long date = 0;
+	
+	public Action dismissAction = null;
+	public ArrayList<Action> actions = null;
 	
 	//Creates the app icon from the base64 encoded string
 	public Image getIcon() {
@@ -81,6 +89,14 @@ public class Notification {
 		return null;
 	}
 	
+	//Creates a calendar object from the date variable
+	public Calendar getCalendar() {
+		Calendar published = Calendar.getInstance();
+		published.setTimeInMillis(date);
+		
+		return published;
+	}
+	
 	//Creates a duplicate of this notification, which can be modified later
 	public Notification copy() {
 		Notification n = new Notification();
@@ -100,145 +116,119 @@ public class Notification {
 		return n;
 	}
 	
-	//Creates a relative string from the date property
-	public String stringFromDate() {
-		Calendar now = Calendar.getInstance();
-		Calendar published = Calendar.getInstance();
-		published.setTimeInMillis(date);
+	//Creates a view, which displays the notification
+	public JPanel createPanel() {
+		//Header view
+		JPanel header = new JPanel();
+		header.setBounds(Properties.multiplier * 0, Properties.multiplier * 0, Properties.multiplier * 359, Properties.multiplier * 30);
+		header.setLayout(null);
+		header.setOpaque(false);
+		header.setBackground(new Color(0, 0, 0, 0));
 		
-		Calendar copy = Calendar.getInstance();
+		//Content view
+		JPanel content = new JPanel();
+		content.setBounds(Properties.multiplier * 0, Properties.multiplier * 30, Properties.multiplier * 359, 0);
+		content.setLayout(null);
+		content.setOpaque(false);
+		content.setBackground(new Color(0, 0, 0, 0));
 		
-		//If the date is today
-		if(published.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) && published.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
-			//Return "now" if less than a minute passed
-			copy.setTimeInMillis(published.getTimeInMillis());
-			copy.add(Calendar.MINUTE, 1);
-			if(copy.after(now)) {
-				return "now";
-			}
-			
-			//Return "Xm ago" if less than an hour passed
-			copy.setTimeInMillis(published.getTimeInMillis());
-			copy.add(Calendar.HOUR, 1);
-			if(copy.after(now)) {
-				return Integer.toString((int)((now.getTimeInMillis() - published.getTimeInMillis()) / 1000 / 60)) + "m ago";
-			}
-			
-			//Return "Xh ago" if less than 4 hours passed
-			copy.setTimeInMillis(published.getTimeInMillis());
-			copy.add(Calendar.HOUR, 4);
-			if(copy.after(now)) {
-				return Integer.toString((int)((now.getTimeInMillis() - published.getTimeInMillis()) / 1000 / 60 / 60)) + "h ago";
-			}
-			
-			//Return "HH:mm" if it was today
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
-			return sdf.format(published.getTime());
-		}
+		//UI elements
+		JLabel icon = new JLabel(new ImageIcon(getIcon().getScaledInstance(Properties.multiplier * 20, Properties.multiplier * 20, Image.SCALE_SMOOTH)));
+		JLabel app = new JLabel(Properties.filterSpecialCharacters(this.app.toUpperCase(), Properties.font));
+		JLabel date = new JLabel(Utilities.stringFromDate(getCalendar()), SwingConstants.RIGHT);
+		JLabel title = new JLabel(Properties.filterSpecialCharacters(this.title, Properties.font));
+		JLabel subtitle = new JLabel(Properties.filterSpecialCharacters(this.subtitle, Properties.font));
+		JTextArea body = new JTextArea(Properties.filterSpecialCharacters(this.body, Properties.font));
+		JLabel attachment = new JLabel(new ImageIcon(getAttachment().getScaledInstance(Properties.multiplier * 35, Properties.multiplier * 35, Image.SCALE_SMOOTH)));
 		
-		//Return "Yesterday, HH:mm" if it was yesterday
-		copy.setTimeInMillis(published.getTimeInMillis());
-		copy.add(Calendar.DAY_OF_YEAR, 1);
-		if(copy.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) && copy.get(Calendar.YEAR) == now.get(Calendar.YEAR)) {
-			SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
-			return "Yesterday, " + sdf.format(published.getTime());
-		}
+		//Setting properties of the body element
+		body.setWrapStyleWord(true);
+		body.setLineWrap(true);
+		body.setEditable(false);
+		body.setBackground(new Color(0, 0, 0, 0));
+		body.setOpaque(false);
+		body.setHighlighter(null);
+		body.setCursor(null);
+		body.setFocusable(false);
 		
-		//Return "EEE HH:mm" if less than a week passed
-		copy.setTimeInMillis(published.getTimeInMillis());
-		copy.add(Calendar.DAY_OF_YEAR, 7);
-		copy.set(Calendar.HOUR_OF_DAY, 0);
-		copy.set(Calendar.MINUTE, 0);
-		copy.set(Calendar.SECOND, 0);
-		if(copy.after(now)) {
-			SimpleDateFormat sdf = new SimpleDateFormat("EEE HH:mm", Locale.ENGLISH);
-			return sdf.format(published.getTime());
-		}
+		//Calculation font sizes
+		float smallSize = Properties.getPointSizeForHeight(Properties.multiplier * 13, Properties.font);
+		float normalSize = Properties.getPointSizeForHeight(Properties.multiplier * 14, Properties.font);
 		
-		//Return "Xw ago" if less than a month passed
-		copy.setTimeInMillis(published.getTimeInMillis());
-		copy.add(Calendar.MONTH, 1);
-		copy.set(Calendar.HOUR_OF_DAY, 0);
-		copy.set(Calendar.MINUTE, 0);
-		copy.set(Calendar.SECOND, 0);
-		if(copy.after(now)) {
-			return Integer.toString((int)((now.getTimeInMillis() - published.getTimeInMillis()) / 1000 / 60 / 60 / 24 / 7)) + "w ago";
-		}
+		//Setting font
+		app.setFont(Properties.font.deriveFont(smallSize));
+		date.setFont(Properties.font.deriveFont(smallSize));
+		title.setFont(Properties.boldFont.deriveFont(normalSize));
+		subtitle.setFont(Properties.boldFont.deriveFont(normalSize));
+		body.setFont(Properties.font.deriveFont(normalSize));
 		
-		//Return "Xmo ago" if less than a year passed
-		copy.setTimeInMillis(published.getTimeInMillis());
-		copy.add(Calendar.YEAR, 1);
-		copy.set(Calendar.HOUR_OF_DAY, 0);
-		copy.set(Calendar.MINUTE, 0);
-		copy.set(Calendar.SECOND, 0);
-		if(copy.after(now)) {
-			return Integer.toString((now.get(Calendar.YEAR) * 12 + now.get(Calendar.MONTH)) - (published.get(Calendar.YEAR) * 12 + published.get(Calendar.MONTH))) + "mo ago";
-		}
+		//Setting text colors
+		app.setForeground(Color.GRAY);
+		date.setForeground(Color.GRAY);
 		
-		//Return "Xy ago" if more than a year passed
-		return Integer.toString(now.get(Calendar.YEAR) - published.get(Calendar.YEAR)) + "y ago";
-	}
-	
-	//Function, which will create a popup for the passed notification and display it
-	public static void presentNotification(Notification notification) {
-		NotificationPopup popup = new NotificationPopup(notification);
-		int height = popup.getHeight();
+		//Adding all elements
+		header.add(icon);
+		header.add(app);
+		header.add(date);
+		if(!this.title.isEmpty()) content.add(title);
+		if(!this.subtitle.isEmpty()) content.add(subtitle);
+		if(!this.body.isEmpty()) content.add(body);
+		if(!this.attachment.isEmpty()) content.add(attachment);
 		
-		//Making all popups go up
-		for(NotificationPopup np : Properties.popups) np.targetY -= height + 10;
+		//Setting element sizes
+		icon.setBounds(Properties.multiplier * 10, Properties.multiplier * 10, Properties.multiplier * 20, Properties.multiplier * 20);
+		app.setBounds(Properties.multiplier * 35, Properties.multiplier * 8, Properties.multiplier * 174, Properties.multiplier * 24);
+		date.setBounds(Properties.multiplier * 209, Properties.multiplier * 8, Properties.multiplier * 135, Properties.multiplier * 24);
 		
-		popup.setLocation(GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width - popup.getWidth() - 10, GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height - popup.getHeight() - 10);
+		title.setBounds(Properties.multiplier * 12, Properties.multiplier * 6, (!this.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), (!this.title.isEmpty() ? Properties.multiplier * 16 : Properties.multiplier * 0));
+		subtitle.setBounds(Properties.multiplier * 12, title.getY() + title.getHeight() + (!this.title.isEmpty() ? Properties.multiplier * 2 : Properties.multiplier * 0), (!this.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), (!this.subtitle.isEmpty() ? Properties.multiplier * 16 : Properties.multiplier * 0));
+		body.setBounds(Properties.multiplier * 12, subtitle.getY() + subtitle.getHeight() + (!this.subtitle.isEmpty() ? Properties.multiplier * 2 : Properties.multiplier * 0), (!this.attachment.isEmpty() ? Properties.multiplier * 282 : Properties.multiplier * 332), Properties.multiplier * 0);
+		attachment.setBounds(Properties.multiplier * 309, Properties.multiplier * 6, Properties.multiplier * 35, (!this.attachment.isEmpty() ? Properties.multiplier * 35 : Properties.multiplier * 0));
 		
-		Properties.popups.add(popup);
+		body.setSize(body.getWidth(), body.getFontMetrics(body.getFont()).getHeight() * Utilities.countLines(body));
 		
-		//Timer, which will wait until there is enough space to display the notification
-		Timer t = new Timer(25, new ActionListener() {
+		content.setSize(content.getWidth(), Properties.multiplier * 10 + Math.max(body.getY() + body.getHeight(), attachment.getY() + attachment.getHeight()));
+		
+		//Creating the panel
+		@SuppressWarnings("serial")
+		JPanel panel = new JPanel() {
+			//Overriding the draw method to draw the rounded rectangle as background
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				if(Properties.popups.indexOf(popup) == 0 || Properties.popups.get(Properties.popups.indexOf(popup) - 1).getY() + Properties.popups.get(Properties.popups.indexOf(popup) - 1).getHeight() <= popup.getY() - 10) {
-					popup.setOpacity(0);
-					popup.setVisible(true);
-					
-					((Timer)e.getSource()).stop();
-					
-					//Timer, which will fade in the notification
-					Timer t = new Timer(50, new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							popup.setOpacity(popup.getOpacity() + 0.25f);
-							
-							if(popup.getOpacity() == 1f) ((Timer) e.getSource()).stop();
-						}
-					});
-					t.start();
-				}
-			}
-		});
-		t.start();
-	}
-	
-	//Function, which will remove a displayed popup
-	public static void removeNotification(NotificationPopup popup) {
-		final int height = popup.getHeight();
-		
-		//Timer, which will fade out the notification
-		Timer t = new Timer(50, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				popup.setOpacity(popup.getOpacity() - 0.25f);
+			protected void paintComponent(Graphics g2) {
+				super.paintComponent(g2);
+				Graphics2D g = (Graphics2D) g2;
 				
-				if(popup.getOpacity() == 0f) {
-					((Timer) e.getSource()).stop();
-					
-					popup.setVisible(false);
-					
-					//Making all popups, which were above this one, go down
-					for(NotificationPopup np : Properties.popups.subList(0, Properties.popups.indexOf(popup))) np.targetY += height + 10;
-					
-					Properties.popups.remove(popup);
-				}
+				//Enabling anti aliasing
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				
+				int cornerRadius = 13 * Properties.multiplier;
+				
+				//Creating the rounded rectangle with rectangles and circles
+				Area a = new Area();
+				a.add(new Area(new Rectangle2D.Double(cornerRadius, 0, getWidth() - 2 * cornerRadius, getHeight())));
+				a.add(new Area(new Rectangle2D.Double(0, cornerRadius, getWidth(), getHeight() - 2 * cornerRadius)));
+				
+				a.add(new Area(new Ellipse2D.Double(0, 0, 2 * cornerRadius, 2 * cornerRadius)));
+				a.add(new Area(new Ellipse2D.Double(getWidth() - 2 * cornerRadius, 0, 2 * cornerRadius, 2 * cornerRadius)));
+				a.add(new Area(new Ellipse2D.Double(0, getHeight() - 2 * cornerRadius, 2 * cornerRadius, 2 * cornerRadius)));
+				a.add(new Area(new Ellipse2D.Double(getWidth() - 2 * cornerRadius, getHeight() - 2 * cornerRadius, 2 * cornerRadius, 2 * cornerRadius)));
+				
+				//Setting the color and drawing the rounded rectangle
+				g.setColor(new Color(240, 240, 240, 224));
+				g.fill(a);
 			}
-		});
-		t.start();
+		};
+		
+		//Setting window properties
+		panel.setSize(Properties.multiplier * 359, header.getHeight() + content.getHeight());
+		panel.setLayout(null);
+		panel.setBackground(new Color(0, 0, 0, 0));
+		panel.setOpaque(false);
+		
+		//Add the header and content panel
+		panel.add(header);
+		panel.add(content);
+		
+		return panel;
 	}
 }

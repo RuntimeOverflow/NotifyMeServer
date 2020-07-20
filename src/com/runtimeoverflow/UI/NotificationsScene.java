@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-import com.runtimeoverflow.NotificationPopup;
 import com.runtimeoverflow.Objects.Device;
 import com.runtimeoverflow.Objects.Notification;
 import com.runtimeoverflow.Utilities.Properties;
@@ -37,7 +36,7 @@ public class NotificationsScene extends JPanel {
 		content.addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				int y = (int)Math.round(content.getY() - (e.getPreciseWheelRotation() * Properties.multiplier * 16));
+				int y = (int)Math.round(content.getY() - (e.getPreciseWheelRotation() * Properties.multiplier * 24));
 				
 				//Limit the y coordinate to top  and bottom
 				y = Math.max(Math.min(y, 0), -content.getHeight() + contentFrame.getHeight());
@@ -63,7 +62,7 @@ public class NotificationsScene extends JPanel {
 					clone.body += "\n\n" + Integer.toString(group.size() - 1) + " more notification" + (group.size() - 1 != 1 ? "s" : "");
 				}
 				
-				JPanel notificationPanel = NotificationPopup.createPanel(clone);
+				JPanel notificationPanel = clone.createPanel();
 				
 				if(groupCount > 0) height += Properties.multiplier * 10;
 				notificationPanel.setLocation(0, height);

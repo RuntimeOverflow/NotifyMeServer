@@ -20,9 +20,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.runtimeoverflow.Main;
+import com.runtimeoverflow.NotificationPopup;
 import com.runtimeoverflow.Window;
 import com.runtimeoverflow.UI.NotificationsScene;
-import com.runtimeoverflow.Utilities.Encryption;
+import com.runtimeoverflow.Utilities.Utilities;
 
 public class Device implements Runnable {
 	//Variables, which get saved
@@ -89,7 +90,7 @@ public class Device implements Runnable {
 						String msg = rawMsg.substring("[NotifyMe] SYNC ".length());
 						
 						//Decrypting the message
-						msg = Encryption.decrypt(msg, key);
+						msg = Utilities.decrypt(msg, key);
 						
 						//The notifications get sent in json and they get parsed here
 						Gson g = new GsonBuilder().create();
@@ -121,7 +122,7 @@ public class Device implements Runnable {
 						msg = parts[2];
 						
 						//Decrypting the message
-						msg = Encryption.decrypt(msg, key);
+						msg = Utilities.decrypt(msg, key);
 						
 						//The notification gets sent in json and it gets parsed here
 						Gson g = new GsonBuilder().serializeNulls().create();
@@ -146,7 +147,7 @@ public class Device implements Runnable {
 						}
 						
 						//Call the function that will display the notification
-						if(popup) Notification.presentNotification(notification);
+						if(popup) NotificationPopup.presentNotification(notification);
 					} else if(rawMsg.startsWith("[NotifyMe] CLOSE")) break;
 				}
 			}
