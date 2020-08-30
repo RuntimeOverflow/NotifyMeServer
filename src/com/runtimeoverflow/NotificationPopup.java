@@ -1,7 +1,6 @@
 package com.runtimeoverflow;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -39,30 +38,6 @@ public class NotificationPopup extends JFrame {
 		panel.setLocation(0, 0);
 		add(panel);
 		
-		//Click passthrough
-		for(Component c : panel.getComponents()) {
-			for(Component c2 : ((JPanel)c).getComponents()) {
-				c2.addMouseListener(new MouseListener() {
-					@Override
-					public void mouseReleased(MouseEvent e) {
-						for(MouseListener ml : getMouseListeners()) ml.mouseReleased(e);
-					}
-					
-					@Override
-					public void mousePressed(MouseEvent e) {}
-					
-					@Override
-					public void mouseExited(MouseEvent e) {}
-					
-					@Override
-					public void mouseEntered(MouseEvent e) {}
-					
-					@Override
-					public void mouseClicked(MouseEvent e) {}
-				});
-			}
-		}
-		
 		//Setting the window properties
 		setLayout(null);
 		setUndecorated(true);
@@ -91,7 +66,7 @@ public class NotificationPopup extends JFrame {
 		t.start();
 		
 		//Creating the click listener, which will hide the notification on right click
-		addMouseListener(new MouseListener() {
+		panel.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if(e.getButton() == MouseEvent.BUTTON1) {
@@ -118,7 +93,7 @@ public class NotificationPopup extends JFrame {
 		});
 		
 		ArrayList<Action> actions = new ArrayList<Action>();
-		actions.add(notification.dismissAction);
+		if(notification.dismissAction != null) actions.add(notification.dismissAction);
 		actions.addAll(notification.actions);
 		
 		for(Action action : actions) {

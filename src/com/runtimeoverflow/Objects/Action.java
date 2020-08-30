@@ -244,6 +244,7 @@ public class Action {
 					super.paintComponent(g2);
 				}
 			};
+			field.setOpaque(false);
 			field.setBounds(Properties.multiplier * 10, Properties.multiplier * 10, actionPanel.getWidth() - button.getWidth() - 3 * Properties.multiplier * 10, actionPanel.getHeight() - 2 * Properties.multiplier * 10);
 			field.setFont(Properties.font.deriveFont(Properties.getPointSizeForHeight(Properties.multiplier * 14, Properties.font)));
 			field.setBorder(BorderFactory.createEmptyBorder());

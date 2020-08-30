@@ -129,7 +129,6 @@ public class MenuBar extends JPanel {
 		
 		leftComponent.setBounds(0, 0, height, height);
 		rightComponent.setBounds(getWidth() - height, 0, height, height);
-		
 		centerLabel.setBounds(height, 0, getWidth() - 2 * height, height);
 		float fontSize = Properties.getPointSizeForHeight((int)(0.8 * height), centerLabel.getFont());
 		centerLabel.setFont(centerLabel.getFont().deriveFont(fontSize));

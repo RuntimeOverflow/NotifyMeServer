@@ -80,6 +80,7 @@ public class Main {
 		Window.get().setTitle("NotifyMe");
 		
 		NotificationsScene s = new NotificationsScene();
+		Properties.mainScene = s;
 		Window.get().setScene(s);
 		
 		//Starting the timer, which will move the notifications up and down. This gets created here and will run the whole time to stay synchronised

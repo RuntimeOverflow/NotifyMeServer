@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import com.runtimeoverflow.Objects.Device;
+import com.runtimeoverflow.Objects.Notification;
 
 public class Server implements Runnable {
 	@Override
@@ -67,6 +68,14 @@ public class Server implements Runnable {
 							device.currentWriter = bw;
 							Thread t = new Thread(device);
 							t.start();
+						} else if(msg.equals("[NotifyMe] VERIFICATION FALSE")) {
+							Notification n = new Notification();
+							n.app = "NotifyMe";
+							n.body = "Invalid password";
+							n.bundleId = "com.runtimeoverflow.notifyme";
+							n.date = Calendar.getInstance().getTimeInMillis();
+							n.dismissAction = null;
+							n.title = "Couldn't connect to " + device.name;
 						}
 					} else reader.close();
 				}

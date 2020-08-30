@@ -1,10 +1,13 @@
 package com.runtimeoverflow.Objects;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
@@ -228,6 +231,29 @@ public class Notification {
 		//Add the header and content panel
 		panel.add(header);
 		panel.add(content);
+		
+		for(Component c : panel.getComponents()) {
+			for(Component c2 : ((JPanel)c).getComponents()) {
+				c2.addMouseListener(new MouseListener() {
+					@Override
+					public void mouseReleased(MouseEvent e) {
+						for(MouseListener ml : panel.getMouseListeners()) ml.mouseReleased(e);
+					}
+					
+					@Override
+					public void mousePressed(MouseEvent e) {}
+					
+					@Override
+					public void mouseExited(MouseEvent e) {}
+					
+					@Override
+					public void mouseEntered(MouseEvent e) {}
+					
+					@Override
+					public void mouseClicked(MouseEvent e) {}
+				});
+			}
+		}
 		
 		return panel;
 	}

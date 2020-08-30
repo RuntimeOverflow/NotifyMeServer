@@ -1,12 +1,15 @@
 package com.runtimeoverflow.UI;
 
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
+import com.runtimeoverflow.Window;
 import com.runtimeoverflow.Objects.Device;
 import com.runtimeoverflow.Objects.Notification;
 import com.runtimeoverflow.Utilities.Properties;
@@ -40,7 +43,7 @@ public class NotificationsScene extends JPanel {
 				
 				//Limit the y coordinate to top  and bottom
 				y = Math.max(Math.min(y, 0), -content.getHeight() + contentFrame.getHeight());
-				content.setLocation(content.getX(), y);
+				if(content.getHeight() > contentFrame.getHeight()) content.setLocation(content.getX(), y);
 			}
 		});
 		
@@ -68,19 +71,28 @@ public class NotificationsScene extends JPanel {
 				notificationPanel.setLocation(0, height);
 				height += notificationPanel.getHeight();
 				
+				notificationPanel.addMouseListener(new MouseListener() {
+					@Override
+					public void mouseReleased(MouseEvent e) {
+						NotificationGroupScene groupScene = new NotificationGroupScene(group);
+						Window.get().setScene(groupScene);
+					}
+					
+					@Override
+					public void mousePressed(MouseEvent e) {}
+					
+					@Override
+					public void mouseExited(MouseEvent e) {}
+					
+					@Override
+					public void mouseEntered(MouseEvent e) {}
+					
+					@Override
+					public void mouseClicked(MouseEvent e) {}
+				});
+				
 				groupCount++;
 				content.add(notificationPanel);
-				
-				/*if(group.size() > 1) {
-					float smallSize = Properties.getPointSizeForHeight(Properties.multiplier * 13, Properties.font);
-					
-					JLabel moreLabel = new JLabel(Integer.toString(group.size() - 1) + " more notification" + (group.size() - 1 != 1 ? "s" : ""));
-					moreLabel.setBounds(Properties.multiplier * 12, height + Properties.multiplier * 5, getWidth(), Properties.multiplier * 13);
-					moreLabel.setFont(Properties.font.deriveFont(smallSize));
-					content.add(moreLabel);
-					
-					height += Properties.multiplier * 18;
-				}*/
 				
 				count += group.size();
 			}

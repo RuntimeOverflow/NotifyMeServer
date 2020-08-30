@@ -9,12 +9,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 import javax.swing.JLabel;
@@ -22,6 +17,7 @@ import javax.swing.JLabel;
 import com.runtimeoverflow.Main;
 import com.runtimeoverflow.NotificationPopup;
 import com.runtimeoverflow.Objects.Device;
+import com.runtimeoverflow.UI.NotificationsScene;
 
 public class Properties {
 	//Variables, which get saved
@@ -33,21 +29,28 @@ public class Properties {
 	public transient static Thread udpListener = null;
 	public transient static ArrayList<Device> discoveredDevices = new ArrayList<Device>();
 	public transient static ArrayList<NotificationPopup> popups = new ArrayList<NotificationPopup>();
+	public transient static NotificationsScene mainScene;
 	public transient static Font font;
 	public transient static Font boldFont;
 	public transient static int multiplier = 1;
 	
 	//Images and icons
 	public transient static BufferedImage logo = null;
+	public transient static BufferedImage indicatorImage = null;
 	public transient static BufferedImage settingsIcon = null;
 	public transient static BufferedImage devicesIcon = null;
+	public transient static BufferedImage backIcon = null;
+	public transient static BufferedImage clearIcon = null;
 	
 	public static void init() {
 		try {
 			//Loads the tweak logo
 			logo = ImageIO.read(Main.class.getResourceAsStream("/resources/Icon.png"));
+			indicatorImage = ImageIO.read(Main.class.getResourceAsStream("/resources/Indicator.png"));
 			settingsIcon = ImageIO.read(Main.class.getResourceAsStream("/resources/Settings.png"));
 			devicesIcon = ImageIO.read(Main.class.getResourceAsStream("/resources/Devices.png"));
+			backIcon = ImageIO.read(Main.class.getResourceAsStream("/resources/Back.png"));
+			clearIcon = ImageIO.read(Main.class.getResourceAsStream("/resources/Clear.png"));
 			
 			//Loads the San Francisco font (=iOS Font)
 			font = Font.createFont(Font.TRUETYPE_FONT, Main.class.getResourceAsStream("/resources/SF-Pro-Text-Light.otf"));
@@ -60,7 +63,7 @@ public class Properties {
 	}
 	
 	//Calculates the broadcast address from each network interface
-	public static ArrayList<InetAddress> calculateBroadcastAddress() {
+	/*public static ArrayList<InetAddress> calculateBroadcastAddress() {
 		ArrayList<InetAddress> broadcastAddresses = new ArrayList<InetAddress>();
 		
 		try {
@@ -87,7 +90,7 @@ public class Properties {
 		}
 		
 		return broadcastAddresses;
-	}
+	}*/
 	
 	//Changes an image to the specified color
 	public static BufferedImage getImageWithColor(Image img, Color color) {
